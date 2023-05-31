@@ -1,0 +1,17 @@
+{
+    "name": "officeintegrator/zoi-php-sdk-examples",
+    "authors": [
+        {
+            "name": "prabakaran.r",
+            "email": "prabakaran.r@zohocorp.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "": "src/"
+        }
+    },
+    "require": {
+        "officeintegrator/zoi-php-sdk": "*"
+    }
+}
