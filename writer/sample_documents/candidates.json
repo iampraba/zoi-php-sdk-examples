@@ -1,0 +1,24 @@
+{
+"fields":[
+
+	{"id":"FirstName","display_name":"First Name","type":"String"},
+	{"id":"LastName","display_name":"Last Name","type":"String"},
+	{"id":"Company","display_name":"Company","type":"String"},
+	{"id":"Salary","display_name":"Salary","type":"String"},
+	{"id":"jobTitle","display_name":"jobTitle","type":"String"},
+	{"id":"Location","display_name":"Location","type":"String"},
+	{"id":"Address Line 1","display_name":"Address Line 1","type":"String"},
+	{"id":"Address Line 2","display_name":"Address Line 2","type":"String"},
+	{"id":"zipCode","display_name":"zipCode","type":"String"}
+],
+"data":[
+    {
+	"FirstName":"Romin","LastName":"Irani","Company":"Zylker Corp","Salary":"20000","Location":"Pleasonton","Address Line 1":"4665 Bernal Ave.","Address Line 2":"Pleasanton, CA","zipCode":"CA 408-1234567"},
+    {
+	"FirstName":"Neil","LastName":"Stephen","Company":"Zylker Corp","Salary":"10000","Location":"Pleasonton","Address Line 1":"4665 Bernal Ave.","Address Line 2":"New York","zipCode":"NY 94566-7498"},
+    {
+	"FirstName":"Tom","LastName":"Hanks","Company":"Zylker Corp","Salary":"50000","Location":"Pleasonton","Address Line 1":"4665 Bernal Ave.","Address Line 2":"Washington","zipCode":"WT 94566-7498"}
+  ]
+
+}
+

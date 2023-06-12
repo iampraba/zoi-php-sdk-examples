@@ -1,6 +1,7 @@
 <?php
 namespace com\zoho\officeintegrator\v1\writer;
-require_once '../vendor/autoload.php';
+
+require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
 use com\zoho\api\authenticator\APIKey;
 use com\zoho\api\logger\Levels;
