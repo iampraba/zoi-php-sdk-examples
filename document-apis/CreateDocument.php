@@ -34,6 +34,7 @@ class CreateDocument {
             $sdkOperations = new V1Operations();
             $createDocumentParameters = new CreateDocumentParameters();
 
+            # Optional Configuration - Add document meta in request to identify the file in Zoho Server
             $documentInfo = new DocumentInfo();
 
             // Time value used to generate a unique document every time. You can replace it based on your application.
@@ -42,6 +43,7 @@ class CreateDocument {
 
             $createDocumentParameters->setDocumentInfo($documentInfo);
 
+            # Optional Configuration - Add User meta in request to identify the user in document session
             $userInfo = new UserInfo();
 
             $userInfo->setUserId("1000");
@@ -49,6 +51,7 @@ class CreateDocument {
 
             $createDocumentParameters->setUserInfo($userInfo);
 
+            # Optional Configuration 
             $margin = new Margin();
 
             $margin->setTop("2in");
@@ -56,6 +59,7 @@ class CreateDocument {
             $margin->setLeft("2in");
             $margin->setRight("2in");
 
+            # Optional Configuration 
             $documentDefaults = new DocumentDefaults();
 
             $documentDefaults->setFontSize(12);
@@ -69,6 +73,7 @@ class CreateDocument {
 
             $createDocumentParameters->setDocumentDefaults($documentDefaults);
 
+            # Optional Configuration 
             $editorSettings = new EditorSettings();
 
             $editorSettings->setUnit("in");
@@ -77,6 +82,7 @@ class CreateDocument {
 
             $createDocumentParameters->setEditorSettings($editorSettings);
 
+            # Optional Configuration 
             $uiOptions = new UiOptions();
 
             $uiOptions->setDarkMode("show");
@@ -86,6 +92,7 @@ class CreateDocument {
 
             $createDocumentParameters->setUiOptions($uiOptions);
 
+            # Optional Configuration 
             $permissions = array();
 
             $permissions["document.export"] = true;
@@ -99,7 +106,12 @@ class CreateDocument {
 
             $createDocumentParameters->setPermissions($permissions);
 
+            # Optional Configuration - Add callback settings to configure.
+            # how file needs to be received while saving the document
             $callbackSettings = new CallbackSettings();
+
+            # Optional Configuration - configure additional parameters
+            # which can be received along with document while save callback
             $saveUrlParams = array();
 
             $saveUrlParams["param1"] = "value1";
@@ -107,6 +119,8 @@ class CreateDocument {
 
             $callbackSettings->setSaveUrlParams($saveUrlParams);
             
+            # Optional Configuration - configure additional headers
+            # which could be received in callback request headers while saving document
             $saveUrlHeaders = array();
 
             $saveUrlHeaders["header1"] = "value1";

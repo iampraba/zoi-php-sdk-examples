@@ -19,6 +19,7 @@ use Exception;
 
 class CompareDocument {
 
+    //Refer Compare API documentation - https://www.zoho.com/officeintegrator/api/v1/writer-comparison-api.html
     public static function execute() {
         self::initializeSdk();
 
@@ -26,6 +27,7 @@ class CompareDocument {
             $sdkOperations = new V1Operations();
             $compareDocumentParameters = new CompareDocumentParameters();
 
+            //Documents that need to be compared need to be passed to below api's.
             $compareDocumentParameters->setUrl1("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
             $compareDocumentParameters->setUrl2("https://demo.office-integrator.com/zdocs/MS_Word_Document_v1.docx");
 
@@ -38,6 +40,7 @@ class CompareDocument {
             // $file2Path = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "MS_Word_Document_v1.docx";
             // $compareDocumentParameters->setDocument2(new StreamWrapper(null, null, $file2Path));
 
+            # Optional Configurations - To set language of the compare document user interface
             $compareDocumentParameters->setLang("en");
             $compareDocumentParameters->setTitle($file1Name . " vs " . $file2Name);
 

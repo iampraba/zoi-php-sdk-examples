@@ -23,6 +23,7 @@ use Exception;
 
 class GetAllSessions {
 
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/zoho-writer-get-document-sessions.html
     public static function execute() {
         // Initializing SDK once is enough. Calling here since the code sample will be tested standalone. 
         // You can place SDK initializer code in your application and call it once while your application starts up.

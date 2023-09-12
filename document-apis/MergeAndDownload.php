@@ -19,6 +19,7 @@ use com\zoho\util\StreamWrapper;
 class MergeAndDownload
 {
 
+    //Refer Merge Document API documentation - https://www.zoho.com/officeintegrator/api/v1/merge-document.html
     public static function execute()
     {
         // Initializing SDK once is enough. Calling here since code sample will be tested standalone. 

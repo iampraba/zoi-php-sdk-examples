@@ -23,6 +23,7 @@ use Exception;
 
 class CreateSpreadsheet {
 
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/zoho-sheet-create-spreadsheet.html
     public static function execute() {
         // Initializing SDK once is enough. Calling here since the code sample will be tested standalone. 
         // You can place SDK initializer code in your application and call it once while your application starts up.
@@ -32,6 +33,7 @@ class CreateSpreadsheet {
             $sdkOperations = new V1Operations();
             $parameters = new CreateSheetParameters();
 
+            # Optional Configuration
             $documentInfo = new DocumentInfo();
 
             // Time value used to generate a unique document every time. You can replace it based on your application.
@@ -40,24 +42,28 @@ class CreateSpreadsheet {
 
             $parameters->setDocumentInfo($documentInfo);
 
+            # Optional Configuration
             $userInfo = new SheetUserSettings();
 
             $userInfo->setDisplayName("User 1");
 
             $parameters->setUserInfo($userInfo);
 
+            # Optional Configuration
             $editorSettings = new SheetEditorSettings();
 
             $editorSettings->setLanguage("en");
 
             $parameters->setEditorSettings($editorSettings);
 
+            # Optional Configuration
             $uiOptions = new SheetUiOptions();
 
             $uiOptions->setSaveButton("show");
 
             $parameters->setUiOptions($uiOptions);
 
+            # Optional Configuration
             $permissions = array();
 
             $permissions["document.export"] = true;
@@ -66,6 +72,7 @@ class CreateSpreadsheet {
 
             $parameters->setPermissions($permissions);
 
+            # Optional Configuration
             $callbackSettings = new SheetCallbackSettings();
             $saveUrlParams = array();
 

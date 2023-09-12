@@ -22,6 +22,7 @@ use Exception;
 
 class CreatePresentation {
 
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/zoho-show-create-presentation.html
     public static function execute() {
         // Initializing SDK once is enough. Calling here since the code sample will be tested standalone. 
         // You can place SDK initializer code in your application and call it once while your application starts up.
@@ -31,6 +32,7 @@ class CreatePresentation {
             $sdkOperations = new V1Operations();
             $parameters = new CreatePresentationParameters();
 
+            # Optional Configuration 
             $documentInfo = new DocumentInfo();
 
             // Time value used to generate a unique document every time. You can replace it based on your application.
@@ -39,6 +41,7 @@ class CreatePresentation {
 
             $parameters->setDocumentInfo($documentInfo);
 
+            # Optional Configuration 
             $userInfo = new UserInfo();
 
             $userInfo->setUserId("100");
@@ -46,12 +49,14 @@ class CreatePresentation {
 
             $parameters->setUserInfo($userInfo);
 
+            # Optional Configuration 
             $editorSettings = new ZohoShowEditorSettings();
 
             $editorSettings->setLanguage("en");
 
             $parameters->setEditorSettings($editorSettings);
 
+            # Optional Configuration 
             $permissions = array();
 
             $permissions["document.export"] = true;
@@ -60,6 +65,7 @@ class CreatePresentation {
 
             $parameters->setPermissions($permissions);
 
+            # Optional Configuration 
             $callbackSettings = new CallbackSettings();
             $saveUrlParams = array();
 

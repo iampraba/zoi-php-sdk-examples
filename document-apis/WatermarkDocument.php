@@ -9,9 +9,6 @@ use com\zoho\dc\DataCenter;
 use com\zoho\InitializeBuilder;
 use com\zoho\officeintegrator\v1\FileBodyWrapper;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
-use com\zoho\officeintegrator\v1\PreviewDocumentInfo;
-use com\zoho\officeintegrator\v1\PreviewParameters;
-use com\zoho\officeintegrator\v1\PreviewResponse;
 use com\zoho\officeintegrator\v1\V1Operations;
 use com\zoho\officeintegrator\v1\WatermarkParameters;
 use com\zoho\officeintegrator\v1\WatermarkSettings;
@@ -21,6 +18,7 @@ use com\zoho\util\StreamWrapper;
 
 class WatermarkDocument {
 
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/watermark-with-text.html
     public static function execute() {
         
         //Initializing SDK once is enough. Calling here since code sample will be tested standalone. 

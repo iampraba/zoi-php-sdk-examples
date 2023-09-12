@@ -23,6 +23,7 @@ use com\zoho\util\StreamWrapper;
 
 class EditDocument {
 
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/zoho-writer-edit-document.html
     public static function execute() {
 
         self::initializeSdk();
@@ -82,6 +83,7 @@ class EditDocument {
 
         $createDocumentParameters->setUiOptions($uiOptions);
 
+        # Optional Configuration 
         $permissions = array();
 
         $permissions["document.export"] = true;
@@ -95,6 +97,8 @@ class EditDocument {
 
         $createDocumentParameters->setPermissions($permissions);
 
+        # Optional Configuration - Add callback settings to configure.
+        # how file needs to be received while saving the document
         $callbackSettings = new CallbackSettings();
         $saveUrlParams = array();
 

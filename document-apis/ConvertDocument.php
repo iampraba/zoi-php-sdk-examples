@@ -30,11 +30,11 @@ class ConvertDocument {
             $documentConversionParameters = new DocumentConversionParameters();
 
             // Either use URL as document source or attach the document in the request body using the methods below
-            $documentConversionParameters->setUrl("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
+            // $documentConversionParameters->setUrl("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
 
             // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
-            // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Graphic-Design-Proposal.docx";
-            // $documentConversionParameters->setDocument(new StreamWrapper(null, null, $filePath));
+            $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Graphic-Design-Proposal.docx";
+            $documentConversionParameters->setDocument(new StreamWrapper(null, null, $filePath));
 
             $outputOptions = new DocumentConversionOutputOptions();
 
@@ -45,7 +45,9 @@ class ConvertDocument {
             $outputOptions->setPassword("***");
 
             $documentConversionParameters->setOutputOptions($outputOptions);
-            $documentConversionParameters->setPassword("***");
+
+            // if input document is password protected, then please configure that password in below code
+            // $documentConversionParameters->setPassword("***");
 
             $responseObject = $sdkOperations->convertDocument($documentConversionParameters);
 

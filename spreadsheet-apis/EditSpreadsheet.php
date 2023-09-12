@@ -38,6 +38,7 @@ class EditSpreadsheet {
             // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Contact_List.xlsx";
             // $createDocumentParameters->setDocument(new StreamWrapper(null, null, $filePath));
 
+            # Optional Configuration
             $documentInfo = new DocumentInfo();
 
             // Time value used to generate a unique document every time. You can replace it based on your application.
@@ -46,18 +47,21 @@ class EditSpreadsheet {
 
             $parameters->setDocumentInfo($documentInfo);
 
+            # Optional Configuration
             $userInfo = new SheetUserSettings();
 
             $userInfo->setDisplayName("User 1");
 
             $parameters->setUserInfo($userInfo);
 
+            # Optional Configuration
             $editorSettings = new SheetEditorSettings();
 
             $editorSettings->setLanguage("en");
 
             $parameters->setEditorSettings($editorSettings);
 
+            # Optional Configuration
             $uiOptions = new SheetUiOptions();
 
             $uiOptions->setSaveButton("show");
@@ -72,6 +76,7 @@ class EditSpreadsheet {
 
             $parameters->setPermissions($permissions);
 
+            # Optional Configuration
             $callbackSettings = new SheetCallbackSettings();
             $saveUrlParams = array();
 

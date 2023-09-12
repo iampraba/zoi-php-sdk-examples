@@ -26,6 +26,7 @@ use Exception;
 
 class CreateMergeTemplate {
 
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/create-template.html
     public static function execute() {
         // Initializing SDK once is enough. Calling here since code sample will be tested standalone.
         // You can place SDK initializer code in your application and call once while your application starts up.
@@ -55,6 +56,7 @@ class CreateMergeTemplate {
 
             $templateParameters->setMergeDataJsonUrl('https://demo.office-integrator.com/data/candidates.json');
 
+            # Optional Configuration - Add document meta in request to identify the file in Zoho Server
             $documentInfo = new DocumentInfo();
 
             // Time value used to generate a unique document every time. You can replace it based on your application.
@@ -63,6 +65,7 @@ class CreateMergeTemplate {
 
             $templateParameters->setDocumentInfo($documentInfo);
 
+            # Optional Configuration - Add User meta in request to identify the user in document session
             $userInfo = new UserInfo();
 
             $userInfo->setUserId("1000");
@@ -70,6 +73,7 @@ class CreateMergeTemplate {
 
             $templateParameters->setUserInfo($userInfo);
 
+            # Optional Configuration
             $margin = new Margin();
 
             $margin->setTop("2in");
@@ -77,6 +81,7 @@ class CreateMergeTemplate {
             $margin->setLeft("2in");
             $margin->setRight("2in");
 
+            # Optional Configuration
             $documentDefaults = new DocumentDefaults();
 
             $documentDefaults->setFontName("Arial");
@@ -88,6 +93,7 @@ class CreateMergeTemplate {
 
             $templateParameters->setDocumentDefaults($documentDefaults);
 
+            # Optional Configuration
             $editorSettings = new EditorSettings();
 
             $editorSettings->setUnit("mm");
@@ -96,6 +102,7 @@ class CreateMergeTemplate {
 
             $templateParameters->setEditorSettings($editorSettings);
 
+            # Optional Configuration
             $permissions = [
                 "document.export" => true,
                 "document.print" => false,
@@ -109,14 +116,23 @@ class CreateMergeTemplate {
 
             $templateParameters->setPermissions($permissions);
 
+            # Optional Configuration - Add callback settings to configure.
+            # how file needs to be received while saving the document
             $callbackSettings = new CallbackSettings();
+
+            # Optional Configuration - configure additional parameters
+            # which can be received along with document while save callback
             $saveUrlParams = array();
 
             $saveUrlHeaders["param1"] = "value1";
             $saveUrlHeaders["param2"] = "value2";
+            # Following $<> values will be replaced by actual value in callback request
+            # To know more - https://www.zoho.com/officeintegrator/api/v1/zoho-writer-create-document.html#saveurl_params
 
             $callbackSettings->setSaveUrlParams($saveUrlParams);
 
+            # Optional Configuration - configure additional headers
+            # which can be received along with document while save callback
             $saveUrlHeaders = array();
 
             $saveUrlHeaders["header1"] = "value1";

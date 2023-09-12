@@ -24,6 +24,7 @@ use com\zoho\util\StreamWrapper;
 
 class CoEditDocument {
 
+    //Refer Co-Edit API documentation - https://www.zoho.com/officeintegrator/api/v1/zoho-writer-co-edit-document.html
     public static function execute() {
         self::initializeSdk();
 
@@ -32,6 +33,7 @@ class CoEditDocument {
         $createDocumentParameters = new CreateDocumentParameters();
 
         $url = "https://demo.office-integrator.com/zdocs/Graphic-Design-Proposal.docx";
+
         $createDocumentParameters->setUrl($url);
 
         // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
@@ -83,6 +85,7 @@ class CoEditDocument {
 
         $createDocumentParameters->setUiOptions($uiOptions);
 
+        # Optional Configuration
         $permissions = array();
 
         $permissions["document.export"] = true;
@@ -96,6 +99,7 @@ class CoEditDocument {
 
         $createDocumentParameters->setPermissions($permissions);
 
+        # Optional Configuration - To add additional custom parameter in save_url callback request
         $callbackSettings = new CallbackSettings();
         $saveUrlParams = array();
 
@@ -104,6 +108,7 @@ class CoEditDocument {
 
         $callbackSettings->setSaveUrlParams($saveUrlParams);
         
+        # Optional Configuration - To add additional custom header in save_url callback request
         $saveUrlHeaders = array();
 
         $saveUrlHeaders["header1"] = "value1";

@@ -24,6 +24,7 @@ use com\zoho\util\StreamWrapper;
 
 class CoEditSpreadsheet {
 
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/zoho-sheet-co-edit-spreadsheet-v1.html
     public static function execute() {
         self::initializeSdk();
 
@@ -44,24 +45,28 @@ class CoEditSpreadsheet {
 
         $parameters->setDocumentInfo($documentInfo);
 
+        # Optional Configuration 
         $userInfo = new SheetUserSettings();
 
         $userInfo->setDisplayName("User 1");
 
         $parameters->setUserInfo($userInfo);
 
+        # Optional Configuration
         $editorSettings = new SheetEditorSettings();
 
         $editorSettings->setLanguage("en");
 
         $parameters->setEditorSettings($editorSettings);
 
+        # Optional Configuration
         $uiOptions = new SheetUiOptions();
 
         $uiOptions->setSaveButton("show");
 
         $parameters->setUiOptions($uiOptions);
 
+        # Optional Configuration
         $permissions = array();
 
         $permissions["document.export"] = true;
@@ -70,12 +75,15 @@ class CoEditSpreadsheet {
 
         $parameters->setPermissions($permissions);
 
+        # Optional Configuration
         $callbackSettings = new SheetCallbackSettings();
         $saveUrlParams = array();
 
         $saveUrlParams["param1"] = "value1";
         $saveUrlParams["param2"] = "value2";
 
+        # Optional Configuration - Add callback settings to configure.
+        # how file needs to be received while saving the document
         $callbackSettings->setSaveUrlParams($saveUrlParams);
         
         $saveUrlHeaders = array();
