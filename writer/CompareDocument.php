@@ -18,23 +18,6 @@ use com\zoho\util\StreamWrapper;
 use Exception;
 
 class CompareDocument {
-    public static function initializeSdk() {
-        $user = new UserSignature("john@zylker.com");
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
-        $apiKey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
-        $logger = (new LogBuilder())
-            ->level(Levels::INFO)
-            ->filePath("./app.log")
-            ->build();
-        $initializeBuilder = (new InitializeBuilder())
-            ->user($user)
-            ->environment($environment)
-            ->token($apiKey)
-            ->logger($logger);
-        $initializeBuilder->initialize();
-
-        echo "\nSDK initialized successfully.\n";
-    }
 
     public static function execute() {
         self::initializeSdk();
@@ -46,20 +29,14 @@ class CompareDocument {
             $compareDocumentParameters->setUrl1("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
             $compareDocumentParameters->setUrl2("https://demo.office-integrator.com/zdocs/MS_Word_Document_v1.docx");
 
+            // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
             $file1Name = "MS_Word_Document_v0.docx";
-            // $file1Path = __DIR__ . "/sample_documents/MS_Word_Document_v0.docx";
-            // $file1Stream = file_get_contents($file1Path);
-            // $stream1Wrapper = new StreamWrapper($file1Name, $file1Stream, $file1Path);
-            // $stream1Wrapper = new StreamWrapper(null, null, $file1Path);
+            // $file1Path = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "MS_Word_Document_v0.docx";
+            // $compareDocumentParameters->setDocument1(new StreamWrapper(null, null, $file1Path));
 
             $file2Name = "MS_Word_Document_v1.docx";
-            // $file2Path = __DIR__ . "/sample_documents/MS_Word_Document_v1.docx";
-            // $file2Stream = file_get_contents($file2Path);
-            // $stream2Wrapper = new StreamWrapper($file2Name, $file2Stream, $file2Path);
-            // $stream2Wrapper = new StreamWrapper(null, null, $file2Path);
-
-            // $compareDocumentParameters->setDocument1($stream1Wrapper);
-            // $compareDocumentParameters->setDocument2($stream2Wrapper);
+            // $file2Path = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "MS_Word_Document_v1.docx";
+            // $compareDocumentParameters->setDocument2(new StreamWrapper(null, null, $file2Path));
 
             $compareDocumentParameters->setLang("en");
             $compareDocumentParameters->setTitle($file1Name . " vs " . $file2Name);
@@ -79,7 +56,15 @@ class CompareDocument {
                         echo "\nCompare URL - " . $writerResponseObject->getCompareUrl() . "\n";
                         echo "\nDocument session delete URL - " . $writerResponseObject->getSessionDeleteUrl() . "\n";
                     } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
-                        echo "\nInvalid configuration exception. Exception JSON - " . json_encode($writerResponseObject) . "\n";
+                        echo "\nInvalid configuration exception." . "\n";
+                        echo "\nError Code - " . $writerResponseObject->getCode() . "\n";
+                        echo "\nError Message - " . $writerResponseObject->getMessage() . "\n";
+                        if ( $writerResponseObject->getKeyName() ) {
+                            echo "\nError Key Name - " . $writerResponseObject->getKeyName() . "\n";
+                        }
+                        if ( $writerResponseObject->getParameterName() ) {
+                            echo "\nError Parameter Name - " . $writerResponseObject->getParameterName() . "\n";
+                        }
                     } else {
                         echo "\nRequest not completed successfully\n";
                     }
@@ -88,6 +73,30 @@ class CompareDocument {
         } catch (Exception $error) {
             echo "\nException while running sample code: " . $error->getMessage() . "\n";
         }
+    }
+
+    public static function initializeSdk() {
+        // Replace email address associated with your apikey below
+        $user = new UserSignature("john@zylker.com");
+        # Update the api domain based on in which data center user register your apikey
+        # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
+        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        # User your apikey that you have in office integrator dashboard
+        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        # Configure a proper file path to write the sdk logs
+        $logger = (new LogBuilder())
+            ->level(Levels::INFO)
+            ->filePath("./app.log")
+            ->build();
+        
+        (new InitializeBuilder())
+            ->user($user)
+            ->environment($environment)
+            ->token($apikey)
+            ->logger($logger)
+            ->initialize();
+
+        echo "SDK initialized successfully.\n";
     }
 }
 

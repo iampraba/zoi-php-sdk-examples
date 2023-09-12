@@ -11,40 +11,20 @@ use com\zoho\dc\DataCenter;
 use com\zoho\InitializeBuilder;
 use com\zoho\officeintegrator\v1\CallbackSettings;
 use com\zoho\officeintegrator\v1\CreateDocumentResponse;
-use com\zoho\officeintegrator\v1\InvalidConfigurationException;
 use com\zoho\UserSignature;
 use com\zoho\util\Constants;
-use com\zoho\officeintegrator\v1\CreateDocumentParameters;
 use com\zoho\officeintegrator\v1\DocumentDefaults;
 use com\zoho\officeintegrator\v1\DocumentInfo;
 use com\zoho\officeintegrator\v1\EditorSettings;
+use com\zoho\officeintegrator\v1\InvalidConfigurationException;
+use com\zoho\officeintegrator\v1\MailMergeTemplateParameters;
 use com\zoho\officeintegrator\v1\Margin;
-use com\zoho\officeintegrator\v1\UiOptions;
 use com\zoho\officeintegrator\v1\UserInfo;
 use com\zoho\officeintegrator\v1\V1Operations;
 use Exception;
 
 
 class CreateMergeTemplate {
-
-    public static function initializeSdk() {
-        $user = new UserSignature("john@zylker.com");
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
-        $logger = (new LogBuilder())
-            ->level(Levels::INFO)
-            ->filePath("./app.log")
-            ->build();
-        
-        (new InitializeBuilder())
-            ->user($user)
-            ->environment($environment)
-            ->token($apikey)
-            ->logger($logger)
-            ->initialize();
-
-        echo "SDK initialized successfully.\n";
-    }
 
     public static function execute() {
         // Initializing SDK once is enough. Calling here since code sample will be tested standalone.
@@ -57,22 +37,23 @@ class CreateMergeTemplate {
 
             // Either use URL as document source or attach the document in the request body using the below methods
             $templateParameters->setUrl("https://demo.office-integrator.com/zdocs/Graphic-Design-Proposal.docx");
-            $templateParameters->setMergeDataJsonUrl("https://demo.office-integrator.com/data/candidates.json");
 
             // $fileName = "OfferLetter.zdoc";
             // $filePath = "./sample_documents/OfferLetter.zdoc";
-            // $fileStream = file_get_contents($filePath);
-            // $streamWrapper = new StreamWrapper($fileName, $fileStream, $filePath);
-            // $streamWrapper = new StreamWrapper(null, null, $filePath);
 
-            // $templateParameters->setDocument($streamWrapper);
+            // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
+            // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "OfferLetter.zdoc";
+            // $templateParameters->setDocument(new StreamWrapper(null, null, $filePath));
 
-            // $jsonFileName = "candidates.json";
+            // $jsonFilePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "candidates.json";
+            // $templateParameters->setDocument(new StreamWrapper(null, null, $jsonFilePath));
+
             // $jsonFilePath = "./sample_documents/candidates.json";
             // $jsonFileStream = file_get_contents($jsonFilePath);
             // $jsonStreamWrapper = new StreamWrapper($jsonFileName, $jsonFileStream, $jsonFilePath);
-
             // $templateParameters->setMergeDataJsonContent($jsonStreamWrapper);
+
+            $templateParameters->setMergeDataJsonUrl('https://demo.office-integrator.com/data/candidates.json');
 
             $documentInfo = new DocumentInfo();
 
@@ -129,12 +110,19 @@ class CreateMergeTemplate {
             $templateParameters->setPermissions($permissions);
 
             $callbackSettings = new CallbackSettings();
-            $saveUrlParams = [
-                "auth_token" => "1234",
-                "id" => "123131"
-            ];
+            $saveUrlParams = array();
+
+            $saveUrlHeaders["param1"] = "value1";
+            $saveUrlHeaders["param2"] = "value2";
 
             $callbackSettings->setSaveUrlParams($saveUrlParams);
+
+            $saveUrlHeaders = array();
+
+            $saveUrlHeaders["header1"] = "value1";
+            $saveUrlHeaders["header2"] = "value2";
+
+            $callbackSettings->setSaveUrlHeaders($saveUrlHeaders);
 
             $callbackSettings->setHttpMethodType("post");
             $callbackSettings->setRetries(1);
@@ -148,10 +136,10 @@ class CreateMergeTemplate {
 
             if ($responseObject !== null) {
                 // Get the status code from the response
-                echo "\nStatus Code: " . $responseObject->statusCode;
+                echo "\nStatus Code: " . $responseObject->getStatusCode();
 
                 // Get the API response object from responseObject
-                $writerResponseObject = $responseObject->object;
+                $writerResponseObject = $responseObject->getObject();
 
                 if ($writerResponseObject !== null) {
                     // Check if the expected CreateDocumentResponse instance is received
@@ -162,7 +150,7 @@ class CreateMergeTemplate {
                         echo "\nDocument save URL - " . $writerResponseObject->getSaveUrl();
                         echo "\nDocument delete URL - " . $writerResponseObject->getDocumentDeleteUrl();
                         echo "\nDocument session delete URL - " . $writerResponseObject->getSessionDeleteUrl();
-                    } elseif ($writerResponseObject instanceof InvaildConfigurationException) {
+                    } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
                         echo "\nInvalid configuration exception. Exception JSON - " . json_encode($writerResponseObject);
                     } else {
                         echo "\nRequest not completed successfully";
@@ -172,6 +160,30 @@ class CreateMergeTemplate {
         } catch (Exception $error) {
             echo "\nException while running sample code: " . $error->getMessage();
         }
+    }
+
+    public static function initializeSdk() {
+        // Replace email address associated with your apikey below
+        $user = new UserSignature("john@zylker.com");
+        # Update the api domain based on in which data center user register your apikey
+        # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
+        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        # User your apikey that you have in office integrator dashboard
+        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        # Configure a proper file path to write the sdk logs
+        $logger = (new LogBuilder())
+            ->level(Levels::INFO)
+            ->filePath("./app.log")
+            ->build();
+        
+        (new InitializeBuilder())
+            ->user($user)
+            ->environment($environment)
+            ->token($apikey)
+            ->logger($logger)
+            ->initialize();
+
+        echo "SDK initialized successfully.\n";
     }
 }
 

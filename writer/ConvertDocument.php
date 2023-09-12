@@ -20,25 +20,6 @@ use Exception;
 
 class ConvertDocument {
 
-    public static function initializeSdk() {
-        $user = new UserSignature("john@zylker.com");
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
-        $logger = (new LogBuilder())
-            ->level(Levels::INFO)
-            ->filePath("./app.log")
-            ->build();
-        
-        (new InitializeBuilder())
-            ->user($user)
-            ->environment($environment)
-            ->token($apikey)
-            ->logger($logger)
-            ->initialize();
-
-        echo "SDK initialized successfully.\n";
-    }
-
     public static function execute() {
         // Initializing SDK once is enough. Calling here since code sample will be tested standalone.
         // You can place SDK initializer code in your application and call once while your application start-up.
@@ -51,13 +32,9 @@ class ConvertDocument {
             // Either use URL as document source or attach the document in the request body using the methods below
             $documentConversionParameters->setUrl("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
 
-            // $fileName = "Graphic-Design-Proposal.docx";
-            // $filePath = __DIR__ . "/sample_documents/Graphic-Design-Proposal.docx";
-            // $fileStream = file_get_contents($filePath);
- 
-            // $streamWrapper = new StreamWrapper($fileName, $fileStream, $filePath);
-
-            // $documentConversionParameters->setDocument($streamWrapper);
+            // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
+            // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Graphic-Design-Proposal.docx";
+            // $documentConversionParameters->setDocument(new StreamWrapper(null, null, $filePath));
 
             $outputOptions = new DocumentConversionOutputOptions();
 
@@ -68,7 +45,7 @@ class ConvertDocument {
             $outputOptions->setPassword("***");
 
             $documentConversionParameters->setOutputOptions($outputOptions);
-            //$documentConversionParameters->setPassword("***");
+            $documentConversionParameters->setPassword("***");
 
             $responseObject = $sdkOperations->convertDocument($documentConversionParameters);
 
@@ -89,15 +66,47 @@ class ConvertDocument {
                             echo "\nCheck converted output file in file path - " . $outputFilePath . "\n";
                         }
                     } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
-                        echo "\nInvalid configuration exception. Exception JSON - " . $writerResponseObject->getMessage() . "\n";
+                        echo "\nInvalid configuration exception." . "\n";
+                        echo "\nError Code - " . $writerResponseObject->getCode() . "\n";
+                        echo "\nError Message - " . $writerResponseObject->getMessage() . "\n";
+                        if ( $writerResponseObject->getKeyName() ) {
+                            echo "\nError Key Name - " . $writerResponseObject->getKeyName() . "\n";
+                        }
+                        if ( $writerResponseObject->getParameterName() ) {
+                            echo "\nError Parameter Name - " . $writerResponseObject->getParameterName() . "\n";
+                        }
                     } else {
-                        echo "\nRequest not completed successfully\n";
+                        echo "\nConversion request not completed successfully\n";
                     }
                 }
             }
         } catch (Exception $error) {
             echo "\nException while running sample code: " . $error->getMessage() . "\n";
         }
+    }
+
+    public static function initializeSdk() {
+        // Replace email address associated with your apikey below
+        $user = new UserSignature("john@zylker.com");
+        # Update the api domain based on in which data center user register your apikey
+        # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
+        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        # User your apikey that you have in office integrator dashboard
+        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        # Configure a proper file path to write the sdk logs
+        $logger = (new LogBuilder())
+            ->level(Levels::INFO)
+            ->filePath("./app.log")
+            ->build();
+        
+        (new InitializeBuilder())
+            ->user($user)
+            ->environment($environment)
+            ->token($apikey)
+            ->logger($logger)
+            ->initialize();
+
+        echo "SDK initialized successfully.\n";
     }
 }
 

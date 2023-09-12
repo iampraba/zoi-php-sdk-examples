@@ -18,26 +18,6 @@ use com\zoho\util\StreamWrapper;
 
 class PreviewDocument {
 
-    //Include zoi-nodejs-sdk package in your package json and the execute this code.
-
-    public static function initializeSdk() {
-        $user = new UserSignature("john@zylker.com");
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
-        $logger = (new LogBuilder())
-            ->level(Levels::INFO)
-            ->filePath("./app.log")
-            ->build();
-        $initialize = (new InitializeBuilder())
-            ->user($user)
-            ->environment($environment)
-            ->token($apikey)
-            ->logger($logger)
-            ->initialize();
-
-        echo "SDK initialized successfully.\n";
-    }
-
     public static function execute() {
         
         //Initializing SDK once is enough. Calling here since code sample will be tested standalone. 
@@ -97,6 +77,30 @@ class PreviewDocument {
         } catch (\Exception $error) {
             echo "\nException while running sample code: " . $error;
         }
+    }
+
+    public static function initializeSdk() {
+        // Replace email address associated with your apikey below
+        $user = new UserSignature("john@zylker.com");
+        # Update the api domain based on in which data center user register your apikey
+        # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
+        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        # User your apikey that you have in office integrator dashboard
+        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        # Configure a proper file path to write the sdk logs
+        $logger = (new LogBuilder())
+            ->level(Levels::INFO)
+            ->filePath("./app.log")
+            ->build();
+        
+        (new InitializeBuilder())
+            ->user($user)
+            ->environment($environment)
+            ->token($apikey)
+            ->logger($logger)
+            ->initialize();
+
+        echo "SDK initialized successfully.\n";
     }
 }
 
