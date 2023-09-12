@@ -1,5 +1,6 @@
 <?php
 namespace com\zoho\officeintegrator\v1\writer;
+use com\zoho\officeintegrator\v1\SheetPreviewResponse;
 
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
@@ -8,66 +9,57 @@ use com\zoho\api\logger\Levels;
 use com\zoho\api\logger\LogBuilder;
 use com\zoho\dc\DataCenter;
 use com\zoho\InitializeBuilder;
-use com\zoho\officeintegrator\v1\DocumentConversionOutputOptions;
-use com\zoho\officeintegrator\v1\DocumentConversionParameters;
-use com\zoho\officeintegrator\v1\FileBodyWrapper;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
-use com\zoho\officeintegrator\v1\V1Operations;
 use com\zoho\UserSignature;
 use com\zoho\util\Constants;
-use com\zoho\util\StreamWrapper;
+use com\zoho\officeintegrator\v1\SheetPreviewParameters;
+use com\zoho\officeintegrator\v1\V1Operations;
 use Exception;
 
-class ConvertDocument {
+class PreviewSpreadsheet {
 
-    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/writer-conversion-api.html
+    //Refer API documentation - https://www.zoho.com/officeintegrator/api/v1/zoho-sheet-preview-spreadsheet.html
     public static function execute() {
-        // Initializing SDK once is enough. Calling here since code sample will be tested standalone.
-        // You can place SDK initializer code in your application and call once while your application start-up.
+        // Initializing SDK once is enough. Calling here since the code sample will be tested standalone. 
+        // You can place SDK initializer code in your application and call it once while your application starts up.
         self::initializeSdk();
 
         try {
             $sdkOperations = new V1Operations();
-            $documentConversionParameters = new DocumentConversionParameters();
+            $parameters = new SheetPreviewParameters();
 
-            // Either use URL as document source or attach the document in the request body using the methods below
-            // $documentConversionParameters->setUrl("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
+            $parameters->setUrl('https://demo.office-integrator.com/samples/sheet/Contact_List.xlsx');
 
             // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
-            $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Graphic-Design-Proposal.docx";
-            $documentConversionParameters->setDocument(new StreamWrapper(null, null, $filePath));
+            // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Contact_List.xlsx";
+            // $parameters->setDocument(new StreamWrapper(null, null, $filePath));
 
-            $outputOptions = new DocumentConversionOutputOptions();
+            $parameters->setLanguage("en");
+            
+            $permissions = array();
 
-            $outputOptions->setFormat("pdf");
-            $outputOptions->setDocumentName("conversion_output.pdf");
-            $outputOptions->setIncludeComments("all");
-            $outputOptions->setIncludeChanges("all");
-            $outputOptions->setPassword("***");
+            $permissions["document.export"] = true;
+            $permissions["document.print"] = false;
 
-            $documentConversionParameters->setOutputOptions($outputOptions);
+            $parameters->setPermissions($permissions);
 
-            // if input document is password protected, then please configure that password in below code
-            // $documentConversionParameters->setPassword("***");
-
-            $responseObject = $sdkOperations->convertDocument($documentConversionParameters);
+            $responseObject = $sdkOperations->createSheetPreview($parameters);
 
             if ($responseObject != null) {
+                // Get the status code from response
                 echo "\nStatus Code: " . $responseObject->getStatusCode() . "\n";
 
-                // Get the API response object from responseObject
+                // Get the api response object from responseObject
                 $writerResponseObject = $responseObject->getObject();
 
                 if ($writerResponseObject != null) {
-                    if ($writerResponseObject instanceof FileBodyWrapper) {
-                        $convertedDocument = $writerResponseObject->getFile();
-
-                        if ($convertedDocument instanceof StreamWrapper) {
-                            $outputFilePath = __DIR__ . "/sample_documents/conversion_output.pdf";
-
-                            file_put_contents($outputFilePath, $convertedDocument->getStream());
-                            echo "\nCheck converted output file in file path - " . $outputFilePath . "\n";
-                        }
+                    // Check if the expected CreateDocumentResponse instance is received
+                    if ($writerResponseObject instanceof SheetPreviewResponse) {
+                        echo "\nSpreadsheet ID - " . $writerResponseObject->getDocumentId() . "\n";
+                        echo "\nSpreadsheet session ID - " . $writerResponseObject->getSessionId() . "\n";
+                        echo "\nSpreadsheet preview session URL - " . $writerResponseObject->getPreviewUrl() . "\n";
+                        echo "\nSpreadsheet delete URL - " . $writerResponseObject->getDocumentDeleteUrl() . "\n";
+                        echo "\nSpreadsheet session delete URL - " . $writerResponseObject->getSessionDeleteUrl() . "\n";
                     } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
                         echo "\nInvalid configuration exception." . "\n";
                         echo "\nError Code - " . $writerResponseObject->getCode() . "\n";
@@ -79,12 +71,12 @@ class ConvertDocument {
                             echo "\nError Parameter Name - " . $writerResponseObject->getParameterName() . "\n";
                         }
                     } else {
-                        echo "\nConversion request not completed successfully\n";
+                        echo "\nRequest not completed successfully\n";
                     }
                 }
             }
         } catch (Exception $error) {
-            echo "\nException while running sample code: " . $error->getMessage() . "\n";
+            echo "\nException while running sample code: " . $error . "\n";
         }
     }
 
@@ -113,6 +105,5 @@ class ConvertDocument {
     }
 }
 
-ConvertDocument::execute(); 
+PreviewSpreadsheet::execute();
 
-?>
