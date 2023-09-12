@@ -10,20 +10,17 @@ use com\zoho\dc\DataCenter;
 use com\zoho\InitializeBuilder;
 use com\zoho\officeintegrator\v1\CallbackSettings;
 use com\zoho\officeintegrator\v1\CreateDocumentResponse;
+use com\zoho\officeintegrator\v1\CreatePresentationParameters;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
 use com\zoho\UserSignature;
 use com\zoho\util\Constants;
-use com\zoho\officeintegrator\v1\CreateDocumentParameters;
-use com\zoho\officeintegrator\v1\DocumentDefaults;
 use com\zoho\officeintegrator\v1\DocumentInfo;
-use com\zoho\officeintegrator\v1\EditorSettings;
-use com\zoho\officeintegrator\v1\Margin;
-use com\zoho\officeintegrator\v1\UiOptions;
 use com\zoho\officeintegrator\v1\UserInfo;
 use com\zoho\officeintegrator\v1\V1Operations;
+use com\zoho\officeintegrator\v1\ZohoShowEditorSettings;
 use Exception;
 
-class CreateDocument {
+class CreatePresentation {
 
     public static function execute() {
         // Initializing SDK once is enough. Calling here since the code sample will be tested standalone. 
@@ -32,72 +29,36 @@ class CreateDocument {
 
         try {
             $sdkOperations = new V1Operations();
-            $createDocumentParameters = new CreateDocumentParameters();
+            $parameters = new CreatePresentationParameters();
 
             $documentInfo = new DocumentInfo();
 
             // Time value used to generate a unique document every time. You can replace it based on your application.
             $documentInfo->setDocumentId(strval(time()));
-            $documentInfo->setDocumentName("New Document");
+            $documentInfo->setDocumentName("New Presentation");
 
-            $createDocumentParameters->setDocumentInfo($documentInfo);
+            $parameters->setDocumentInfo($documentInfo);
 
             $userInfo = new UserInfo();
 
-            $userInfo->setUserId("1000");
-            $userInfo->setDisplayName("Prabakaran R");
+            $userInfo->setUserId("100");
+            $userInfo->setDisplayName("User 1");
 
-            $createDocumentParameters->setUserInfo($userInfo);
+            $parameters->setUserInfo($userInfo);
 
-            $margin = new Margin();
+            $editorSettings = new ZohoShowEditorSettings();
 
-            $margin->setTop("2in");
-            $margin->setBottom("2in");
-            $margin->setLeft("2in");
-            $margin->setRight("2in");
-
-            $documentDefaults = new DocumentDefaults();
-
-            $documentDefaults->setFontSize(12);
-            $documentDefaults->setPaperSize("A4");
-            $documentDefaults->setFontName("Arial");
-            $documentDefaults->setTrackChanges("enabled");
-            $documentDefaults->setOrientation("landscape");
-
-            $documentDefaults->setMargin($margin);
-            $documentDefaults->setLanguage("ta");
-
-            $createDocumentParameters->setDocumentDefaults($documentDefaults);
-
-            $editorSettings = new EditorSettings();
-
-            $editorSettings->setUnit("in");
             $editorSettings->setLanguage("en");
-            $editorSettings->setView("pageview");
 
-            $createDocumentParameters->setEditorSettings($editorSettings);
-
-            $uiOptions = new UiOptions();
-
-            $uiOptions->setDarkMode("show");
-            $uiOptions->setFileMenu("show");
-            $uiOptions->setSaveButton("show");
-            $uiOptions->setChatPanel("show");
-
-            $createDocumentParameters->setUiOptions($uiOptions);
+            $parameters->setEditorSettings($editorSettings);
 
             $permissions = array();
 
             $permissions["document.export"] = true;
             $permissions["document.print"] = false;
             $permissions["document.edit"] = true;
-            $permissions["review.comment"] = false;
-            $permissions["review.changes.resolve"] = false;
-            $permissions["collab.chat"] = false;
-            $permissions["document.pausecollaboration"] = false;
-            $permissions["document.fill"] = false;
 
-            $createDocumentParameters->setPermissions($permissions);
+            $parameters->setPermissions($permissions);
 
             $callbackSettings = new CallbackSettings();
             $saveUrlParams = array();
@@ -112,17 +73,17 @@ class CreateDocument {
             $saveUrlHeaders["header1"] = "value1";
             $saveUrlHeaders["header2"] = "value2";
 
-            $callbackSettings->setSaveUrlHeaders($saveUrlHeaders);
+            //$callbackSettings->setSaveUrlHeaders($saveUrlHeaders);
 
             $callbackSettings->setRetries(1);
-            $callbackSettings->setSaveFormat("zdoc");
+            $callbackSettings->setSaveFormat("pptx");
             $callbackSettings->setHttpMethodType("post");
             $callbackSettings->setTimeout(100000);
             $callbackSettings->setSaveUrl("https://officeintegrator.zoho.com/v1/api/webhook/savecallback/601e12157123434d4e6e00cc3da2406df2b9a1d84a903c6cfccf92c8286");
 
-            $createDocumentParameters->setCallbackSettings($callbackSettings);
+            $parameters->setCallbackSettings($callbackSettings);
 
-            $responseObject = $sdkOperations->createDocument($createDocumentParameters);
+            $responseObject = $sdkOperations->createPresentation($parameters);
 
             if ($responseObject != null) {
                 // Get the status code from response
@@ -141,7 +102,15 @@ class CreateDocument {
                         echo "\nDocument delete URL - " . $writerResponseObject->getDocumentDeleteUrl() . "\n";
                         echo "\nDocument session delete URL - " . $writerResponseObject->getSessionDeleteUrl() . "\n";
                     } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
-                        echo "\nInvalid configuration exception. Exception json - " . $writerResponseObject . "\n";
+                        echo "\nInvalid configuration exception." . "\n";
+                        echo "\nError Code - " . $writerResponseObject->getCode() . "\n";
+                        echo "\nError Message - " . $writerResponseObject->getMessage() . "\n";
+                        if ( $writerResponseObject->getKeyName() ) {
+                            echo "\nError Key Name - " . $writerResponseObject->getKeyName() . "\n";
+                        }
+                        if ( $writerResponseObject->getParameterName() ) {
+                            echo "\nError Parameter Name - " . $writerResponseObject->getParameterName() . "\n";
+                        }
                     } else {
                         echo "\nRequest not completed successfully\n";
                     }
@@ -177,5 +146,5 @@ class CreateDocument {
     }
 }
 
-CreateDocument::execute();
+CreatePresentation::execute();
 

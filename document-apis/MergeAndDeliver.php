@@ -8,16 +8,16 @@ use com\zoho\api\logger\Levels;
 use com\zoho\api\logger\LogBuilder;
 use com\zoho\dc\DataCenter;
 use com\zoho\InitializeBuilder;
-use com\zoho\officeintegrator\v1\FileBodyWrapper;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
-use com\zoho\officeintegrator\v1\MergeAndDownloadDocumentParameters;
+use com\zoho\officeintegrator\v1\MailMergeWebhookSettings;
+use com\zoho\officeintegrator\v1\MergeAndDeliverViaWebhookParameters;
+use com\zoho\officeintegrator\v1\MergeAndDeliverViaWebhookSuccessResponse;
 use com\zoho\officeintegrator\v1\V1Operations;
 use com\zoho\UserSignature;
 use com\zoho\util\Constants;
 use com\zoho\util\StreamWrapper;
 
-class MergeAndDownload
-{
+class MergeAndDeliver {
 
     public static function execute()
     {
@@ -27,18 +27,15 @@ class MergeAndDownload
 
         try {
             $sdkOperations = new V1Operations();
-            $parameters = new MergeAndDownloadDocumentParameters();
+            $parameters = new MergeAndDeliverViaWebhookParameters();
 
-            $parameters->setFileUrl("https://demo.office-integrator.com/zdocs/OfferLetter.zdoc");
-            $parameters->setMergeDataJsonUrl("https://demo.office-integrator.com/data/candidates.json");
+            $parameters->setFileUrl('https://demo.office-integrator.com/zdocs/OfferLetter.zdoc');
+            $parameters->setMergeDataJsonUrl('https://demo.office-integrator.com/data/candidates.json');
 
             // $fileName = "OfferLetter.zdoc";
             // $filePath = __DIR__ . "/sample_documents/OfferLetter.zdoc";
             // $fileStream = file_get_contents($filePath);
             // $streamWrapper = new StreamWrapper($fileName, $fileStream, $filePath);
-            
-            $parameters->setPassword("***");
-            $parameters->setOutputFormat("pdf");
             // $parameters->setFileContent($streamWrapper);
 
             // $jsonFileName = "candidates.json";
@@ -64,7 +61,18 @@ class MergeAndDownload
             $parameters->setMergeDataJsonUrl("https://demo.office-integrator.com/zdocs/json_data_source.json");
             */
 
-            $responseObject = $sdkOperations->mergeAndDownloadDocument($parameters);
+            $parameters->setPassword("***");
+            $parameters->setOutputFormat("pdf");
+            $parameters->setMergeTo('separatedoc');
+
+            $webhookSettings = new MailMergeWebhookSettings();
+
+            $webhookSettings->setInvokeUrl('https://officeintegrator.zoho.com/v1/api/webhook/savecallback/601e12157a25e63fc4dfd4e6e00cc3da2406df2b9a1d84a903c6cfccf92c8286');
+            $webhookSettings->setInvokePeriod('oncomplete');
+
+            $parameters->setWebhook($webhookSettings);
+
+            $responseObject = $sdkOperations->mergeAndDeliverViaWebhook($parameters);
 
             if ($responseObject !== null) {
                 echo "\nStatus Code: " . $responseObject->getStatusCode() . "\n";
@@ -72,17 +80,26 @@ class MergeAndDownload
                 $writerResponseObject = $responseObject->getObject();
 
                 if ($writerResponseObject !== null) {
-                    if ($writerResponseObject instanceof FileBodyWrapper) {
-                        $convertedDocument = $writerResponseObject->getFile();
+                    if ($writerResponseObject instanceof MergeAndDeliverViaWebhookSuccessResponse) {
+                        $mergeReportUrl = $writerResponseObject->getMergeReportDataUrl();
 
-                        if ($convertedDocument instanceof StreamWrapper) {
-                            $outputFilePath = __DIR__ . "/sample_documents/merge_and_download.pdf";
+                        echo "\nMerge Report URL - " . $mergeReportUrl . "\n";
 
-                            file_put_contents($outputFilePath, $convertedDocument->getStream());
-                            echo "\nCheck merged output file in file path - $outputFilePath\n";
+                        $records = $writerResponseObject->getRecords();
+
+                        foreach ( $records as $record ) {
+                            echo "Records : " . $record;
                         }
                     } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
-                        echo "\nInvalid configuration exception. Exception json - " . json_encode($writerResponseObject) . "\n";
+                        echo "\nInvalid configuration exception." . "\n";
+                        echo "\nError Code - " . $writerResponseObject->getCode() . "\n";
+                        echo "\nError Message - " . $writerResponseObject->getMessage() . "\n";
+                        if ( $writerResponseObject->getKeyName() ) {
+                            echo "\nError Key Name - " . $writerResponseObject->getKeyName() . "\n";
+                        }
+                        if ( $writerResponseObject->getParameterName() ) {
+                            echo "\nError Parameter Name - " . $writerResponseObject->getParameterName() . "\n";
+                        }
                     } else {
                         echo "\nRequest not completed successfully\n";
                     }
@@ -118,4 +135,4 @@ class MergeAndDownload
     }
 }
 
-MergeAndDownload::execute();
+MergeAndDeliver::execute();
