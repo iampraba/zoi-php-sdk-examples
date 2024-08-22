@@ -1,21 +1,23 @@
 <?php
 namespace com\zoho\officeintegrator\v1\writer;
+use com\zoho\officeintegrator\v1\MergeAndDeliverRecordsMeta;
 
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
-use com\zoho\api\authenticator\APIKey;
-use com\zoho\api\logger\Levels;
-use com\zoho\api\logger\LogBuilder;
-use com\zoho\dc\DataCenter;
-use com\zoho\InitializeBuilder;
+
+use com\zoho\api\authenticator\AuthBuilder;
+use com\zoho\officeintegrator\dc\apiserver\Production;
+use com\zoho\officeintegrator\InitializeBuilder;
+use com\zoho\officeintegrator\logger\Levels;
+use com\zoho\officeintegrator\logger\LogBuilder;
+use com\zoho\officeintegrator\util\StreamWrapper;
+use com\zoho\officeintegrator\v1\Authentication;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
 use com\zoho\officeintegrator\v1\MailMergeWebhookSettings;
 use com\zoho\officeintegrator\v1\MergeAndDeliverViaWebhookParameters;
 use com\zoho\officeintegrator\v1\MergeAndDeliverViaWebhookSuccessResponse;
 use com\zoho\officeintegrator\v1\V1Operations;
-use com\zoho\UserSignature;
-use com\zoho\util\Constants;
-use com\zoho\util\StreamWrapper;
+
 
 class MergeAndDeliver {
 
@@ -30,37 +32,16 @@ class MergeAndDeliver {
             $sdkOperations = new V1Operations();
             $parameters = new MergeAndDeliverViaWebhookParameters();
 
-            $parameters->setFileUrl('https://demo.office-integrator.com/zdocs/OfferLetter.zdoc');
+            $parameters->setFileUrl("https://demo.office-integrator.com/zdocs/OfferLetter.zdoc");
+
+            // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
+            // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "OfferLetter.zdoc";
+            // $parameters->setFileContent(new StreamWrapper(null, null, $filePath));
+
             $parameters->setMergeDataJsonUrl('https://demo.office-integrator.com/data/candidates.json');
 
-            // $fileName = "OfferLetter.zdoc";
-            // $filePath = __DIR__ . "/sample_documents/OfferLetter.zdoc";
-            // $fileStream = file_get_contents($filePath);
-            // $streamWrapper = new StreamWrapper($fileName, $fileStream, $filePath);
-            // $parameters->setFileContent($streamWrapper);
-
-            // $jsonFileName = "candidates.json";
-            // $jsonFilePath = __DIR__ . "/sample_documents/candidates.json";
-            // $jsonFileStream = file_get_contents($jsonFilePath);
-            // $jsonStreamWrapper = new StreamWrapper($jsonFileName, $jsonFileStream, $jsonFilePath);
-
-            // $parameters->setMergeDataJsonContent($jsonStreamWrapper);
-
-            /*
-            $mergeData = new Map();
-
-            $parameters->setMergeData($mergeData);
-
-            $csvFileName = "csv_data_source.csv";
-            $csvFilePath = __DIR__ . "/sample_documents/csv_data_source.csv";
-            $csvFileStream = file_get_contents($csvFilePath);
-            $csvStreamWrapper = new StreamWrapper($csvFileName, $csvFileStream, $csvFilePath);
-
-            $parameters->setMergeDataCsvContent($csvStreamWrapper);
-
-            $parameters->setMergeDataCsvUrl("https://demo.office-integrator.com/data/csv_data_source.csv");
-            $parameters->setMergeDataJsonUrl("https://demo.office-integrator.com/zdocs/json_data_source.json");
-            */
+            // $jsonFilePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "candidates.json";
+            // $parameters->setMergeDataJsonContent(new StreamWrapper(null, null, $jsonFilePath));
 
             $parameters->setPassword("***");
             $parameters->setOutputFormat("pdf");
@@ -89,7 +70,12 @@ class MergeAndDeliver {
                         $records = $writerResponseObject->getRecords();
 
                         foreach ( $records as $record ) {
-                            echo "Records : " . $record;
+                            if ($record instanceof MergeAndDeliverRecordsMeta) {
+                                echo "\n\nRecord Name : " . $record->getName();
+                                echo "\nRecord Email : " . $record->getEmail();
+                                echo "\nRecord Status : " . $record->getStatus();
+                                echo "\nRecord Download Link : " . $record->getDownloadLink();
+                            }
                         }
                     } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
                         echo "\nInvalid configuration exception." . "\n";
@@ -112,13 +98,18 @@ class MergeAndDeliver {
     }
 
     public static function initializeSdk() {
-        // Replace email address associated with your apikey below
-        $user = new UserSignature("john@zylker.com");
+
         # Update the api domain based on in which data center user register your apikey
         # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        $environment = new Production("https://api.office-integrator.com");
         # User your apikey that you have in office integrator dashboard
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        //Update this apikey with your own apikey signed up in office inetgrator service
+        $authBuilder = new AuthBuilder();
+        $authentication = new Authentication();
+        $authBuilder->addParam("apikey", "2ae438cf864488657cc9754a27daa480");
+        $authBuilder->authenticationSchema($authentication->getTokenFlow());
+        $tokens = [ $authBuilder->build() ];
+
         # Configure a proper file path to write the sdk logs
         $logger = (new LogBuilder())
             ->level(Levels::INFO)
@@ -126,9 +117,8 @@ class MergeAndDeliver {
             ->build();
         
         (new InitializeBuilder())
-            ->user($user)
             ->environment($environment)
-            ->token($apikey)
+            ->tokens($tokens)
             ->logger($logger)
             ->initialize();
 

@@ -3,14 +3,14 @@ namespace com\zoho\officeintegrator\v1\writer;
 
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
-use com\zoho\api\authenticator\APIKey;
-use com\zoho\api\logger\Levels;
-use com\zoho\api\logger\LogBuilder;
-use com\zoho\dc\DataCenter;
-use com\zoho\InitializeBuilder;
+
+use com\zoho\api\authenticator\AuthBuilder;
+use com\zoho\officeintegrator\dc\apiserver\Production;
+use com\zoho\officeintegrator\InitializeBuilder;
+use com\zoho\officeintegrator\logger\Levels;
+use com\zoho\officeintegrator\logger\LogBuilder;
+use com\zoho\officeintegrator\v1\Authentication;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
-use com\zoho\UserSignature;
-use com\zoho\util\Constants;
 use com\zoho\officeintegrator\v1\CreateSheetParameters;
 use com\zoho\officeintegrator\v1\CreateSheetResponse;
 use com\zoho\officeintegrator\v1\SessionInfo;
@@ -47,12 +47,12 @@ class GetSessionDetails {
                 echo "\nStatus Code: " . $responseObject->getStatusCode() . "\n";
 
                 // Get the api response object from responseObject
-                $writerResponseObject = $responseObject->getObject();
+                $spreadsheetResponseObject = $responseObject->getObject();
 
-                if ($writerResponseObject != null) {
+                if ($spreadsheetResponseObject != null) {
                     // Check if the expected CreateDocumentResponse instance is received
-                    if ($writerResponseObject instanceof CreateSheetResponse) {
-                        $sessionId = $writerResponseObject->getSessionId();
+                    if ($spreadsheetResponseObject instanceof CreateSheetResponse) {
+                        $sessionId = $spreadsheetResponseObject->getSessionId();
                         
                         $sessionsResponse = $sdkOperations->getSheetSession($sessionId);
 
@@ -102,15 +102,15 @@ class GetSessionDetails {
                             }
                         }
 
-                    } elseif ($writerResponseObject instanceof InvalidConfigurationException) {
+                    } elseif ($spreadsheetResponseObject instanceof InvalidConfigurationException) {
                         echo "\nInvalid configuration exception." . "\n";
-                        echo "\nError Code - " . $writerResponseObject->getCode() . "\n";
-                        echo "\nError Message - " . $writerResponseObject->getMessage() . "\n";
-                        if ( $writerResponseObject->getKeyName() ) {
-                            echo "\nError Key Name - " . $writerResponseObject->getKeyName() . "\n";
+                        echo "\nError Code - " . $spreadsheetResponseObject->getCode() . "\n";
+                        echo "\nError Message - " . $spreadsheetResponseObject->getMessage() . "\n";
+                        if ( $spreadsheetResponseObject->getKeyName() ) {
+                            echo "\nError Key Name - " . $spreadsheetResponseObject->getKeyName() . "\n";
                         }
-                        if ( $writerResponseObject->getParameterName() ) {
-                            echo "\nError Parameter Name - " . $writerResponseObject->getParameterName() . "\n";
+                        if ( $spreadsheetResponseObject->getParameterName() ) {
+                            echo "\nError Parameter Name - " . $spreadsheetResponseObject->getParameterName() . "\n";
                         }
                     } else {
                         echo "\nRequest not completed successfully\n";
@@ -123,13 +123,18 @@ class GetSessionDetails {
     }
 
     public static function initializeSdk() {
-        // Replace email address associated with your apikey below
-        $user = new UserSignature("john@zylker.com");
+
         # Update the api domain based on in which data center user register your apikey
         # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        $environment = new Production("https://api.office-integrator.com");
         # User your apikey that you have in office integrator dashboard
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        //Update this apikey with your own apikey signed up in office inetgrator service
+        $authBuilder = new AuthBuilder();
+        $authentication = new Authentication();
+        $authBuilder->addParam("apikey", "2ae438cf864488657cc9754a27daa480");
+        $authBuilder->authenticationSchema($authentication->getTokenFlow());
+        $tokens = [ $authBuilder->build() ];
+
         # Configure a proper file path to write the sdk logs
         $logger = (new LogBuilder())
             ->level(Levels::INFO)
@@ -137,9 +142,8 @@ class GetSessionDetails {
             ->build();
         
         (new InitializeBuilder())
-            ->user($user)
             ->environment($environment)
-            ->token($apikey)
+            ->tokens($tokens)
             ->logger($logger)
             ->initialize();
 

@@ -3,19 +3,19 @@ namespace com\zoho\officeintegrator\v1\writer;
 
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
-use com\zoho\api\authenticator\APIKey;
-use com\zoho\api\logger\Levels;
-use com\zoho\api\logger\LogBuilder;
-use com\zoho\dc\DataCenter;
-use com\zoho\InitializeBuilder;
+use com\zoho\api\authenticator\AuthBuilder;
+use com\zoho\officeintegrator\dc\apiserver\Production;
+use com\zoho\officeintegrator\InitializeBuilder;
+use com\zoho\officeintegrator\logger\Levels;
+use com\zoho\officeintegrator\logger\LogBuilder;
+use com\zoho\officeintegrator\util\StreamWrapper;
+use com\zoho\officeintegrator\v1\Authentication;
 use com\zoho\officeintegrator\v1\DocumentConversionOutputOptions;
 use com\zoho\officeintegrator\v1\DocumentConversionParameters;
 use com\zoho\officeintegrator\v1\FileBodyWrapper;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
 use com\zoho\officeintegrator\v1\V1Operations;
-use com\zoho\UserSignature;
-use com\zoho\util\Constants;
-use com\zoho\util\StreamWrapper;
+
 use Exception;
 
 class ConvertDocument {
@@ -31,11 +31,11 @@ class ConvertDocument {
             $documentConversionParameters = new DocumentConversionParameters();
 
             // Either use URL as document source or attach the document in the request body using the methods below
-            // $documentConversionParameters->setUrl("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
+            $documentConversionParameters->setUrl("https://demo.office-integrator.com/zdocs/MS_Word_Document_v0.docx");
 
             // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
-            $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Graphic-Design-Proposal.docx";
-            $documentConversionParameters->setDocument(new StreamWrapper(null, null, $filePath));
+            // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Graphic-Design-Proposal.docx";
+            // $documentConversionParameters->setDocument(new StreamWrapper(null, null, $filePath));
 
             $outputOptions = new DocumentConversionOutputOptions();
 
@@ -89,13 +89,18 @@ class ConvertDocument {
     }
 
     public static function initializeSdk() {
-        // Replace email address associated with your apikey below
-        $user = new UserSignature("john@zylker.com");
+
         # Update the api domain based on in which data center user register your apikey
         # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        $environment = new Production("https://api.office-integrator.com");
         # User your apikey that you have in office integrator dashboard
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        //Update this apikey with your own apikey signed up in office inetgrator service
+        $authBuilder = new AuthBuilder();
+        $authentication = new Authentication();
+        $authBuilder->addParam("apikey", "2ae438cf864488657cc9754a27daa480");
+        $authBuilder->authenticationSchema($authentication->getTokenFlow());
+        $tokens = [ $authBuilder->build() ];
+
         # Configure a proper file path to write the sdk logs
         $logger = (new LogBuilder())
             ->level(Levels::INFO)
@@ -103,9 +108,8 @@ class ConvertDocument {
             ->build();
         
         (new InitializeBuilder())
-            ->user($user)
             ->environment($environment)
-            ->token($apikey)
+            ->tokens($tokens)
             ->logger($logger)
             ->initialize();
 
