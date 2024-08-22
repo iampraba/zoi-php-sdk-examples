@@ -2,19 +2,19 @@
 
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
-use com\zoho\api\authenticator\APIKey;
-use com\zoho\api\logger\Levels;
-use com\zoho\api\logger\LogBuilder;
-use com\zoho\dc\DataCenter;
-use com\zoho\InitializeBuilder;
+use com\zoho\api\authenticator\AuthBuilder;
+use com\zoho\officeintegrator\dc\apiserver\Production;
+use com\zoho\officeintegrator\InitializeBuilder;
+use com\zoho\officeintegrator\logger\Levels;
+use com\zoho\officeintegrator\logger\LogBuilder;
+use com\zoho\officeintegrator\util\StreamWrapper;
+use com\zoho\officeintegrator\v1\Authentication;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
 use com\zoho\officeintegrator\v1\PreviewDocumentInfo;
 use com\zoho\officeintegrator\v1\PreviewParameters;
 use com\zoho\officeintegrator\v1\PreviewResponse;
 use com\zoho\officeintegrator\v1\V1Operations;
-use com\zoho\UserSignature;
-use com\zoho\util\Constants;
-use com\zoho\util\StreamWrapper;
+
 
 class PreviewDocument {
 
@@ -31,11 +31,9 @@ class PreviewDocument {
 
             $previewParameters->setUrl("https://demo.office-integrator.com/zdocs/Graphic-Design-Proposal.docx");
 
-            // $fileName = "Graphic-Design-Proposal.docx";
-            // $filePath = __DIR__ . "/sample_documents/Graphic-Design-Proposal.docx";
-            // $fileStream = file_get_contents($filePath);
-            // $streamWrapper = new StreamWrapper($fileName, $fileStream, $filePath);
-            // $previewParameters->setDocument($streamWrapper);
+            // Either you can give the document as publicly downloadable url as above or add the file in request body itself using below code.
+            // $filePath = getcwd() . DIRECTORY_SEPARATOR . "sample_documents" . DIRECTORY_SEPARATOR . "Graphic-Design-Proposal.docx";
+            // $previewParameters->setDocument(new StreamWrapper(null, null, $filePath));
 
             $previewDocumentInfo = new PreviewDocumentInfo();
 
@@ -81,13 +79,18 @@ class PreviewDocument {
     }
 
     public static function initializeSdk() {
-        // Replace email address associated with your apikey below
-        $user = new UserSignature("john@zylker.com");
+
         # Update the api domain based on in which data center user register your apikey
         # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        $environment = new Production("https://api.office-integrator.com");
         # User your apikey that you have in office integrator dashboard
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        //Update this apikey with your own apikey signed up in office inetgrator service
+        $authBuilder = new AuthBuilder();
+        $authentication = new Authentication();
+        $authBuilder->addParam("apikey", "2ae438cf864488657cc9754a27daa480");
+        $authBuilder->authenticationSchema($authentication->getTokenFlow());
+        $tokens = [ $authBuilder->build() ];
+
         # Configure a proper file path to write the sdk logs
         $logger = (new LogBuilder())
             ->level(Levels::INFO)
@@ -95,9 +98,8 @@ class PreviewDocument {
             ->build();
         
         (new InitializeBuilder())
-            ->user($user)
             ->environment($environment)
-            ->token($apikey)
+            ->tokens($tokens)
             ->logger($logger)
             ->initialize();
 

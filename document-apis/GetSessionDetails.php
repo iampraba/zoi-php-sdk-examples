@@ -3,15 +3,15 @@ namespace com\zoho\officeintegrator\v1\writer;
 
 require_once dirname(__FILE__) . '/../vendor/autoload.php';
 
-use com\zoho\api\authenticator\APIKey;
-use com\zoho\api\logger\Levels;
-use com\zoho\api\logger\LogBuilder;
-use com\zoho\dc\DataCenter;
-use com\zoho\InitializeBuilder;
+
+use com\zoho\api\authenticator\AuthBuilder;
+use com\zoho\officeintegrator\dc\apiserver\Production;
+use com\zoho\officeintegrator\InitializeBuilder;
+use com\zoho\officeintegrator\logger\Levels;
+use com\zoho\officeintegrator\logger\LogBuilder;
+use com\zoho\officeintegrator\v1\Authentication;
 use com\zoho\officeintegrator\v1\CreateDocumentResponse;
 use com\zoho\officeintegrator\v1\InvalidConfigurationException;
-use com\zoho\UserSignature;
-use com\zoho\util\Constants;
 use com\zoho\officeintegrator\v1\CreateDocumentParameters;
 use com\zoho\officeintegrator\v1\SessionInfo;
 use com\zoho\officeintegrator\v1\SessionMeta;
@@ -55,6 +55,8 @@ class GetSessionDetails {
                     if ($writerResponseObject instanceof CreateDocumentResponse) {
                         $sessionId = $writerResponseObject->getSessionId();
                         
+                        echo "\nInvoking document session information api";
+
                         $sessionsResponse = $sdkOperations->getSession($sessionId);
 
                         if ($sessionsResponse != null) {
@@ -67,12 +69,11 @@ class GetSessionDetails {
                             if ($sessionsResponseObj != null) {
                                 // Check if the expected CreateDocumentResponse instance is received
                                 if ($sessionsResponseObj instanceof SessionMeta) {            
-                                    echo "Session Status : " . $sessionsResponseObj->getStatus();
+                                        echo "\nSession Status : " . $sessionsResponseObj->getStatus();
 
                                         $sessionInfo = $sessionsResponseObj->getInfo();
 
                                         if ($sessionInfo instanceof SessionInfo) {
-                                            echo "\nSession Status : " . $sessionInfo->getSessionUrl();
                                             echo "\nSession Session - Document ID  : " . $sessionInfo->getDocumentId();
                                             echo "\nSession Session URL : " . $sessionInfo->getSessionUrl();
                                             echo "\nSession Session Delete URL : " . $sessionInfo->getSessionDeleteUrl();
@@ -124,13 +125,18 @@ class GetSessionDetails {
     }
 
     public static function initializeSdk() {
-        // Replace email address associated with your apikey below
-        $user = new UserSignature("john@zylker.com");
+
         # Update the api domain based on in which data center user register your apikey
         # To know more - https://www.zoho.com/officeintegrator/api/v1/getting-started.html
-        $environment = DataCenter::setEnvironment("https://api.office-integrator.com", null, null, null);
+        $environment = new Production("https://api.office-integrator.com");
         # User your apikey that you have in office integrator dashboard
-        $apikey = new APIKey("2ae438cf864488657cc9754a27daa480", Constants::PARAMS);
+        //Update this apikey with your own apikey signed up in office inetgrator service
+        $authBuilder = new AuthBuilder();
+        $authentication = new Authentication();
+        $authBuilder->addParam("apikey", "2ae438cf864488657cc9754a27daa480");
+        $authBuilder->authenticationSchema($authentication->getTokenFlow());
+        $tokens = [ $authBuilder->build() ];
+
         # Configure a proper file path to write the sdk logs
         $logger = (new LogBuilder())
             ->level(Levels::INFO)
@@ -138,9 +144,8 @@ class GetSessionDetails {
             ->build();
         
         (new InitializeBuilder())
-            ->user($user)
             ->environment($environment)
-            ->token($apikey)
+            ->tokens($tokens)
             ->logger($logger)
             ->initialize();
 
